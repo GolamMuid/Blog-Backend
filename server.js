@@ -1,14 +1,25 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const colors = require("colors");
-
-// importing routes
-const blogs = require("./routes/blogs");
+const morgan = require("morgan");
+const connectDB = require("./config/db");
 
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
 
+// Connect to Databse
+connectDB();
+
 const app = express();
+
+// Dev logging middleware
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+
+// importing routes
+const blogs = require("./routes/blogs");
 
 // Mount routers
 app.use("/api/v1/blogs", blogs);
