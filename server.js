@@ -18,21 +18,24 @@ app.use(express.json());
 
 // Dev logging middleware
 if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+	app.use(morgan("dev"));
 }
 
 // importing routes
 const blogs = require("./routes/blogs");
+const errorHandler = require("./middlewares/error");
 
 // Mount routers
 app.use("/api/v1/blogs", blogs);
 
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(
-  PORT,
-  console.log(
-    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.blue
-      .inverse
-  )
+	PORT,
+	console.log(
+		`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.blue
+			.inverse
+	)
 );
