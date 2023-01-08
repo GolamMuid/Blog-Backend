@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const colors = require("colors");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 
 // Load env vars
@@ -16,6 +17,9 @@ const app = express();
 // Body Parser
 app.use(express.json());
 
+// Cookie Parser
+app.use(cookieParser());
+
 // Dev logging middleware
 if (process.env.NODE_ENV === "development") {
 	app.use(morgan("dev"));
@@ -23,10 +27,12 @@ if (process.env.NODE_ENV === "development") {
 
 // importing routes
 const blogs = require("./routes/blogs");
+const auth = require("./routes/auth");
 const errorHandler = require("./middlewares/error");
 
 // Mount routers
 app.use("/api/v1/blogs", blogs);
+app.use("/api/v1/auth", auth);
 
 app.use(errorHandler);
 
