@@ -30,6 +30,10 @@ exports.getBlog = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.createBlog = asyncHandler(async (req, res, next) => {
+	// Add user to req.body
+
+	req.body.user = req.user.id;
+
 	const blog = await Blog.create(req.body);
 
 	res.status(201).json({
@@ -43,15 +47,28 @@ exports.createBlog = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.updateBlog = asyncHandler(async (req, res, next) => {
-	const blog = await Blog.findByIdAndUpdate(req.params.id, req.body, {
-		new: true,
-		runValidators: true,
-	});
+	let blog = await Blog.findById(req.params.id);
+
 	if (!blog) {
 		return next(
 			new ErrorResponse(`Blog not found with the id of ${req.params.id}`, 404)
 		);
 	}
+
+	// Make sure user is bootcamp owner
+	if (blog.user.toString() !== req.user.id) {
+		return next(
+			new ErrorResponse(
+				`User ${req.params.id} is not authorized to execute this operation`,
+				401
+			)
+		);
+	}
+
+	blog = await Blog.findOneAndUpdate(req.params.id, req.body, {
+		new: true,
+		runValidators: true,
+	});
 
 	res.status(200).json({ success: true, data: blog });
 });
@@ -61,13 +78,25 @@ exports.updateBlog = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.deleteBlog = asyncHandler(async (req, res, next) => {
-	const blog = await Blog.findByIdAndDelete(req.params.id);
+	const blog = await Blog.findById(req.params.id);
 
 	if (!blog) {
 		return next(
 			new ErrorResponse(`Blog not found with the id of ${req.params.id}`, 404)
 		);
 	}
+
+	// Make sure user is bootcamp owner
+	if (blog.user.toString() !== req.user.id) {
+		return next(
+			new ErrorResponse(
+				`User ${req.params.id} is not authorized to execute this operation`,
+				401
+			)
+		);
+	}
+
+	blog.remove();
 
 	res.status(200).json({ success: true, data: {} });
 });
